@@ -3,7 +3,7 @@
 # Hent en fast udgave af hovedprojektet, mens imaget bygges.
 FROM alpine:3 AS assets
 RUN apk add --no-cache curl ca-certificates
-ARG DASHBOARD_REF=64b536ae5d47fec0a6fbe54a70d69626f1a3b03e
+ARG DASHBOARD_REF=f9d67854eb9df0a5cf084da7291c65b3f11eccf3
 WORKDIR /assets
 RUN set -eu; \
     for file in index.html language.js LICENSE; do \
