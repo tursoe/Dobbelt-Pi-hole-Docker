@@ -8,6 +8,7 @@ to two, three or four Pi-hole v6 instances. There is no application backend or d
 
 This first package uses dashboard **v1.3.007**, pinned to source commit
 `64b536ae5d47fec0a6fbe54a70d69626f1a3b03e`, and Chart.js **4.4.1**.
+The lastest version is **v1.4.008** from `f9d67854eb9df0a5cf084da7291c65b3f11eccf3`
 The dashboard files are downloaded when the image is built. No files are downloaded
 when the container starts. The dashboard source stays in the original repository.
 
