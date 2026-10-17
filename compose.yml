@@ -1,3 +1,5 @@
+name: Dobbelt-Pi-hole
+
 services:
   dashboard:
     build: .
