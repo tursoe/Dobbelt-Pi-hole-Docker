@@ -1,4 +1,4 @@
-name: Dobbelt-Pi-hole
+name: dobbelt-pi-hole
 
 services:
   dashboard:
