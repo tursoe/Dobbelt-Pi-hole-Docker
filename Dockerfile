@@ -29,7 +29,7 @@ RUN chmod 0555 /opt/docker-entrypoint.sh
 LABEL org.opencontainers.image.title="Double Pi-hole Docker" \
       org.opencontainers.image.source="https://github.com/tursoe/Dobbelt-Pi-hole-Docker" \
       org.opencontainers.image.licenses="MIT" \
-      org.opencontainers.image.version="1.3.007-1"
+      org.opencontainers.image.version="1.4.008-1"
 
 # Alt genereret indhold er midlertidigt. Ingen adgangskoder gemmes her.
 USER 101:101
