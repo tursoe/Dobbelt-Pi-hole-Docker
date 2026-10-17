@@ -1,0 +1,62 @@
+services:
+  dashboard:
+    build: .
+    image: dobbelt-pi-hole-docker:local
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      # ------------------------------------------------------
+      # Antal PiHole installationer du vil forbinde til
+      # -
+      # Number of Pi-hole installations you want to connect to
+      # ------------------------------------------------------
+      PIHOLE_COUNT: "2"
+
+      # ------------------------------------------------------
+      # HTTPS-certifikater kontrolleres som standard. Her er kontrollen
+      # slået fra for hver installation med selvsigneret certifikat.
+      # -
+      # HTTPS certificates are checked by default. Here the check is
+      # turned off for each installation with a self-signed certificate.
+      # ------------------------------------------------------
+      PIHOLE_1_URL: "https://192.168.1.10/api"
+      PIHOLE_1_NAME: "Pi-hole 1"
+      PIHOLE_1_VERIFY_TLS: "false"
+
+      PIHOLE_2_URL: "https://192.168.1.11/api"
+      PIHOLE_2_NAME: "Pi-hole 2"
+      PIHOLE_2_VERIFY_TLS: "false"
+
+      # ------------------------------------------------------
+      # Aktivér også disse ved tre eller fire installationer.
+      # -
+      # Also activate these for three or four installations.
+      # ------------------------------------------------------
+      # PIHOLE_3_URL: "https://192.168.1.12/api"
+      # PIHOLE_3_NAME: "Pi-hole 3"
+      # PIHOLE_3_VERIFY_TLS: "false"
+      # 
+      # PIHOLE_4_URL: "https://192.168.1.13/api"
+      # PIHOLE_4_NAME: "Pi-hole 4"
+      # PIHOLE_4_VERIFY_TLS: "false"
+
+
+    # ------------------------------------------------------
+    # Valgfri egen sprogfil. Den kopieres til webmappen ved containerens opstart.
+    # Billedet indeholder allerede language.js fra https://github.com/tursoe/Dobbelt-Pi-hole
+    # (med tysk). Montér kun en fil her, hvis du vil bruge din egen.
+    # -
+    # Optional custom language file. It is copied to the web directory when the container starts.
+    # The image already contains language.js from https://github.com/tursoe/Dobbelt-Pi-hole
+    # (with German). Mount a file here only if you want to use your own.
+    # ------------------------------------------------------
+    # volumes:
+    #   - ./language.js:/opt/dashboard/language.js:ro
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
