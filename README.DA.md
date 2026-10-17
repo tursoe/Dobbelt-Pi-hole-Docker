@@ -9,6 +9,7 @@ applikationsbackend eller database.
 
 Første udgave bruger **v1.3.007** fra den faste kildekodeversion
 `64b536ae5d47fec0a6fbe54a70d69626f1a3b03e` samt Chart.js **4.4.1**.
+Nyeste version er **v1.4.008** fra `f9d67854eb9df0a5cf084da7291c65b3f11eccf3`
 Filerne hentes, når imaget bygges. De hentes ikke ved containerens opstart.
 Kontrolpanelets kildekode bliver i det oprindelige repository.
 
