@@ -48,6 +48,12 @@ done
 check sh -c "curl -fsS '$base/healthz' | grep -qx ok"
 check sh -c "curl -fsS '$base/' > '$page'"
 check grep -q 'const DEFAULT_SERVER_COUNT = 3;' "$page"
+check grep -q 'const DOCKER_INSTALLATION = true;' "$page"
+check grep -q 'const APP_VERSION = "1.4.010";' "$page"
+# Test den faktiske nginx konfiguration uden at kræve internetadgang til GitHub.
+check sh -c "docker exec '$app' cat /tmp/dobbelt-pi-hole/nginx.conf | grep -q 'location = /versioncheck/'"
+check sh -c "docker exec '$app' cat /tmp/dobbelt-pi-hole/nginx.conf | grep -q 'refs/heads/main/version.js'"
+check sh -c "docker exec '$app' cat /tmp/dobbelt-pi-hole/nginx.conf | grep -q 'proxy_pass_request_headers off;'"
 check grep -q '"label":"Test 1"' "$page"
 check sh -c "curl -fsSI -H 'Accept-Encoding: gzip' '$base/' | grep -qi 'content-encoding: gzip'"
 check sh -c "curl -fsSI '$base/chart.umd.min.js' | head -n 1 | grep -q 200"
