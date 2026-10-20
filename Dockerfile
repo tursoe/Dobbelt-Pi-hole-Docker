@@ -3,7 +3,7 @@
 # Hent en fast udgave af hovedprojektet, mens imaget bygges.
 FROM alpine:3 AS assets
 RUN apk add --no-cache curl ca-certificates
-ARG DASHBOARD_REF=f9d67854eb9df0a5cf084da7291c65b3f11eccf3
+ARG DASHBOARD_REF=9e1404990df350cff461f00e10cfd4ef714d40ff
 WORKDIR /assets
 RUN set -eu; \
     for file in index.html language.js LICENSE; do \
@@ -29,7 +29,7 @@ RUN chmod 0555 /opt/docker-entrypoint.sh
 LABEL org.opencontainers.image.title="Double Pi-hole Docker" \
       org.opencontainers.image.source="https://github.com/tursoe/Dobbelt-Pi-hole-Docker" \
       org.opencontainers.image.licenses="MIT" \
-      org.opencontainers.image.version="1.4.008-1"
+      org.opencontainers.image.version="1.4.010-1"
 
 # Alt genereret indhold er midlertidigt. Ingen adgangskoder gemmes her.
 USER 101:101

@@ -33,8 +33,11 @@ done
 # Et navn må ikke kunne lukke HTML-filens scriptblok.
 printf '%s' "$servers" | jq -r 'tojson | gsub("<"; "\\u003c") | gsub(">"; "\\u003e") | gsub("&"; "\\u0026")' > "$runtime_dir/servers.json"
 
-# Udskift kun de to kendte opsætningsfelter i kopien af HTML-filen.
+# Udskift de kendte opsætningsfelter, og aktivér versionstjek i Docker kopien.
 awk -v count="$PIHOLE_COUNT" -v config="$runtime_dir/servers.json" '
+    /const DOCKER_INSTALLATION[[:space:]]*=/ {
+        docker_flags += sub(/const DOCKER_INSTALLATION[[:space:]]*=[[:space:]]*false;/, "const DOCKER_INSTALLATION = true;")
+    }
     /const DEFAULT_SERVER_COUNT[[:space:]]*=/ {
         counts += sub(/const DEFAULT_SERVER_COUNT[[:space:]]*=[[:space:]]*[234];/, "const DEFAULT_SERVER_COUNT = " count ";")
     }
@@ -48,8 +51,21 @@ awk -v count="$PIHOLE_COUNT" -v config="$runtime_dir/servers.json" '
     }
     replacing { if ($0 ~ /\];/) replacing = 0; next }
     { print }
-    END { if (counts != 1 || arrays != 1 || replacing) exit 1 }
+    END { if (counts != 1 || arrays != 1 || docker_flags != 1 || replacing) exit 1 }
 ' "$asset_dir/index.html" > "$runtime_dir/web/index.html" || fail 'HTML-filens opsætningsfelter kunne ikke genkendes.'
+
+# Brug containerens DNS til opslag ved versionstjekket, ikke ved nginx opstart.
+# Ingen ekstern DNS server tilføjes. Uden DNS bliver kun versionstjekket utilgængeligt.
+version_resolvers=$(awk '
+    $1 == "nameserver" && $2 ~ /^[0-9A-Fa-f:.]+$/ {
+        if (index($2, ":")) printf "[%s] ", $2
+        else printf "%s ", $2
+    }
+' /etc/resolv.conf)
+version_resolver_config=''
+if [ -n "$version_resolvers" ]; then
+    version_resolver_config="resolver $version_resolvers valid=300s; resolver_timeout 5s;"
+fi
 
 cat > "$runtime_dir/nginx.conf" <<EOF
 worker_processes auto;
@@ -81,6 +97,26 @@ http {
         add_header Referrer-Policy "same-origin" always;
         add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self';" always;
         location = /healthz { access_log off; default_type text/plain; return 200 "ok\\n"; }
+
+        # Variabel i proxy_pass udsætter GitHub DNS opslaget til selve forespørgslen.
+        location = /versioncheck/ {
+            $version_resolver_config
+            set \$version_upstream https://raw.githubusercontent.com/tursoe/Dobbelt-Pi-hole/refs/heads/main/version.js;
+            proxy_pass \$version_upstream;
+            proxy_ssl_server_name on;
+            proxy_ssl_name raw.githubusercontent.com;
+            proxy_ssl_verify on;
+            proxy_ssl_verify_depth 3;
+            proxy_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.crt;
+            proxy_pass_request_headers off;
+            proxy_set_header Host raw.githubusercontent.com;
+            proxy_set_header Connection "";
+            proxy_cache off;
+            proxy_hide_header Cache-Control;
+            proxy_connect_timeout 5s;
+            proxy_read_timeout 5s;
+            # Cache-Control og øvrige sikkerhedsheaders arves fra server blokken.
+        }
 EOF
 
 index=1

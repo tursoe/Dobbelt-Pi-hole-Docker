@@ -7,16 +7,16 @@ Dockerpakke til [Dobbelt Pi-hole](https://github.com/tursoe/Dobbelt-Pi-hole).
 APIkald til to, tre eller fire Pi-hole v6 installationer. Der er ingen
 applikationsbackend eller database.
 
-Første udgave bruger **v1.3.007** fra den faste kildekodeversion
-`64b536ae5d47fec0a6fbe54a70d69626f1a3b03e` samt Chart.js **4.4.1**.
-Nyeste version er **v1.4.008** fra `f9d67854eb9df0a5cf084da7291c65b3f11eccf3`
+Denne pakke bruger kontrolpanelet **v1.4.010** fra den faste kildecommit
+`9e1404990df350cff461f00e10cfd4ef714d40ff` samt Chart.js **4.4.1**.
+Docker imagets version er **1.4.010-1**.
 Filerne hentes, når imaget bygges. De hentes ikke ved containerens opstart.
 Kontrolpanelets kildekode bliver i det oprindelige repository.
 
-## Første lokale bygning
+## Lokal bygning
 
 Kræver Docker Engine med Compose eller Docker Desktop.
-Denne første udgave bygges lokalt. Et færdigt image er endnu ikke offentliggjort.
+Den medfølgende Compose fil bygger lokalt. Se **Færdigt billede** nedenfor for at bruge det offentliggjorte image.
 
 1. Hent filerne fra dette repository, eller klon det:
 
@@ -35,8 +35,9 @@ Denne første udgave bygges lokalt. Et færdigt image er endnu ikke offentliggjo
 
 4. Åbn `http://DIN-DOCKER-SERVER:8080`, og log ind med hver Pi-holes app password.
 
-Der skal være internetadgang under bygningen. Den kørende container behøver kun
-adgang til dine Pi-hole installationer. Adgangskoder skal ikke stå i Compose.
+Der skal være internetadgang under bygningen og ved versionstjek. Kontrolpanelet
+fungerer stadig med lokale Pi-hole installationer uden internetadgang.
+Adgangskoder skal ikke stå i Compose.
 
 ## Opsætning
 
@@ -126,7 +127,7 @@ Node.js- eller PHPtjeneste.
 
 GitHub Actions bygger billedet til `linux/amd64` og `linux/arm64` og udgiver det i GitHub
 Container Registry som `ghcr.io/tursoe/dobbelt-pi-hole`, mærket `latest` og med versionen,
-fx `1.3.007-1`. Billedet bygges igen hver mandag, så opdateringer til nginx og Alpine følger
+fx `1.4.010-1`. Billedet bygges igen hver mandag, så opdateringer til nginx og Alpine følger
 med. Før hver udgivelse starter workflowen billedet med samme hærdning som i `compose.yml`
 ved siden af en falsk Pi-hole og kører `tests/smoke.sh`.
 
@@ -144,14 +145,35 @@ docker compose up -d
 ```
 
 Vil du bruge en fast version i stedet for `latest`, angives et versionstag, fx
-`ghcr.io/tursoe/dobbelt-pi-hole:1.3.007-1`.
+`ghcr.io/tursoe/dobbelt-pi-hole:1.4.010-1`.
 
 ## Versioner og opdatering
 
-Versionstagget er dashboardets version efterfulgt af Docker-pakkens revision, fx `1.3.007-1`.
+Versionstagget er dashboardets version efterfulgt af Docker-pakkens revision, fx `1.4.010-1`.
 Dashboardet er fastlåst til en kildecommit med `DASHBOARD_REF` i Dockerfile, så en ny
 dashboardversion kræver, at værdien gennemses og ændres, at versionsmærket i Dockerfile
 rettes, og at ændringen committes. Workflowen udgiver derefter det nye billede.
+
+
+## Kontrol af nye kontrolpanelversioner
+
+Opstartsscriptet sætter kun `DOCKER_INSTALLATION = true` i containerens
+midlertidige kopi af `index.html`. Hovedprojektets almindelige download ændres ikke.
+Browseren tjekker én gang pr. fanesession og igen, hver gang Indstillinger åbnes.
+En nyere kontrolpanelversion vises med en rød prik på Indstillinger. På siden
+vises versionen og et link til udgivelserne. Genindlæsning bruger sessionens resultat.
+
+nginx videresender `/versioncheck/` til hovedprojektets `version.js` på GitHub via
+HTTPS med certifikatkontrol. Browserens legitimationsoplysninger og indgående
+request headers videresendes ikke. DNS opslaget udføres først ved et versionstjek
+med containerens konfigurerede DNS. Utilgængelig GitHub forhindrer derfor ikke
+nginx i at starte. Et mislykket tjek påvirker ikke kontrolpanelet eller Pi-hole APIerne.
+
+Kontrollen sammenligner det medfølgende kontrolpanels `APP_VERSION` med den
+udgivne kontrolpanelversion. Den opdager ikke nye Docker builds med samme
+kontrolpanelversion og installerer ikke opdateringer. Ved brug af det færdige image
+køres `docker compose pull` og `docker compose up -d`. Ved lokal bygning opdateres
+først dette repository, hvorefter `docker compose up -d --build` køres.
 
 ## Licens
 
