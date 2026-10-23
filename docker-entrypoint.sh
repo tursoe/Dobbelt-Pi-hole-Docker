@@ -17,7 +17,11 @@ esac
 asset_dir=${DASHBOARD_ASSET_DIR:-/opt/dashboard}
 runtime_dir=${DASHBOARD_RUNTIME_DIR:-/tmp/dobbelt-pi-hole}
 mkdir -p "$runtime_dir/web" "$runtime_dir/client_temp" "$runtime_dir/proxy_temp"
-for file in index.html language.js chart.umd.min.js; do
+for file in index.html language.js language.template.js version.js \
+    README.md README.DA.md LICENSE Chart.js.LICENSE chart.umd.min.js \
+    favicon.ico icon.svg favicon-16x16.png favicon-32x32.png \
+    apple-touch-icon.png android-chrome-192x192.png android-chrome-512x512.png \
+    site.webmanifest; do
     [ -r "$asset_dir/$file" ] || fail "Filen $file mangler i imaget."
     cp "$asset_dir/$file" "$runtime_dir/web/$file"
 done

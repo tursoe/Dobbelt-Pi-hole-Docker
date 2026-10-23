@@ -49,7 +49,7 @@ check sh -c "curl -fsS '$base/healthz' | grep -qx ok"
 check sh -c "curl -fsS '$base/' > '$page'"
 check grep -q 'const DEFAULT_SERVER_COUNT = 3;' "$page"
 check grep -q 'const DOCKER_INSTALLATION = true;' "$page"
-check grep -q 'const APP_VERSION = "1.4.010";' "$page"
+check grep -q 'const APP_VERSION = "1.5.011";' "$page"
 # Test den faktiske nginx konfiguration uden at kræve internetadgang til GitHub.
 check sh -c "docker exec '$app' cat /tmp/dobbelt-pi-hole/nginx.conf | grep -q 'location = /versioncheck/'"
 check sh -c "docker exec '$app' cat /tmp/dobbelt-pi-hole/nginx.conf | grep -q 'refs/heads/main/version.js'"
@@ -58,9 +58,20 @@ check grep -q '"label":"Test 1"' "$page"
 check sh -c "curl -fsSI -H 'Accept-Encoding: gzip' '$base/' | grep -qi 'content-encoding: gzip'"
 check sh -c "curl -fsSI '$base/chart.umd.min.js' | head -n 1 | grep -q 200"
 check sh -c "curl -fsSI '$base/language.js' | head -n 1 | grep -q 200"
+for asset in language.template.js version.js README.md README.DA.md LICENSE \
+    Chart.js.LICENSE favicon.ico icon.svg favicon-16x16.png \
+    favicon-32x32.png apple-touch-icon.png android-chrome-192x192.png \
+    android-chrome-512x512.png site.webmanifest; do
+	check sh -c "curl -fsSI '$base/$asset' | head -n 1 | grep -q 200"
+done
 check sh -c "curl -fsSI '$base/' | grep -qi 'x-content-type-options: nosniff'"
 # End to end through the proxy to the fake Pi-hole.
 check sh -c "curl -fsS '$base/api1/auth' | grep -q '\"valid\":false'"
+check sh -c "curl -fsS '$base/api1/groups' | grep -q '\"name\":\"Default\"'"
+check sh -c "curl -fsS '$base/api1/config/dns/cnameRecords' | grep -q 'alias.test,target.test,60'"
+check sh -c "curl -fsS '$base/api1/network/devices?max_devices=2147483647&max_addresses=2147483647' | grep -q 'max_devices=2147483647&max_addresses=2147483647'"
+check sh -c "curl -fsS -X DELETE -o /dev/null -w '%{http_code}' '$base/api1/network/devices/12' | grep -qx 204"
+check sh -c "curl -fsSI '$base/api1/teleporter' | grep -qi 'content-disposition: attachment'"
 check sh -c "[ \"\$(docker exec '$app' id -u)\" = 101 ]"
 
 # Invalid settings must stop the container with a clear message.

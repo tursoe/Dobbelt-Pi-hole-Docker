@@ -6,11 +6,21 @@ Docker packaging for the [Double Pi-hole dashboard](https://github.com/tursoe/Do
 One container serves the dashboard and Chart.js through nginx and proxies requests
 to two, three or four Pi-hole v6 instances. There is no application backend or database.
 
-This package uses dashboard **v1.4.010**, pinned to source commit
-`9e1404990df350cff461f00e10cfd4ef714d40ff`, and Chart.js **4.4.1**.
-The Docker image version is **1.4.010-1**.
-The dashboard files are downloaded when the image is built. No files are downloaded
+This package is prepared for dashboard **v1.5.011** and Chart.js **4.4.1**.
+`DASHBOARD_REF` in the Dockerfile still contains the previous source commit.
+Replace it with the final v1.5.011 commit after uploading the main dashboard,
+before building this Docker image locally.
+The Docker image version is **1.5.011-1**.
+The dashboard, language template, icons and web manifest are downloaded when the image is built. No files are downloaded
 when the container starts. The dashboard source stays in the original repository.
+
+## Dashboard v1.5.011
+
+This release adds Overview for comparing instance configuration, group management
+and memberships, local CNAME records, Teleporter backup downloads, a sequential
+Gravity queue, network device cleanup and a configurable start tab. Group controls
+are hidden automatically when only the default group is used. Client activity
+charts show every client series supplied by the Pi-hole API.
 
 ## Local build
 
@@ -102,7 +112,9 @@ The startup script copies the mounted file to the temporary web directory.
 After changing the file, run `docker compose restart dashboard` and reload the
 browser tab. To add or change the mount itself, use `docker compose up -d`.
 The file must exist before startup and be readable by container user 101.
-See `language.template.js` in the main project for the language-pack format.
+The complete `language.template.js` is included in the image and can be downloaded
+through Settings. Existing valid v1.4.010 language packs remain supported; missing
+new messages fall back to English. The v1.5.011 template contains 368 message keys.
 
 ## Operation
 
@@ -126,7 +138,7 @@ utility; there is no Python, Node.js or PHP application service.
 
 GitHub Actions builds the image for `linux/amd64` and `linux/arm64` and publishes it to
 GitHub Container Registry as `ghcr.io/tursoe/dobbelt-pi-hole`, tagged `latest` and with the
-version, for example `1.4.010-1`. The image is rebuilt every Monday to pick up updates to the
+version, for example `1.5.011-1`. The image is rebuilt every Monday to pick up updates to the
 nginx and Alpine base images. Before each publication, the workflow starts the image with
 the hardening from `compose.yml` next to a fake Pi-hole and runs `tests/smoke.sh`.
 
@@ -144,24 +156,41 @@ docker compose up -d
 ```
 
 To use a fixed version instead of `latest`, give the image a version tag, for example
-`ghcr.io/tursoe/dobbelt-pi-hole:1.4.010-1`.
+`ghcr.io/tursoe/dobbelt-pi-hole:1.5.011-1`.
 
 ## Versions and updates
 
 The version tag is the dashboard version followed by the Docker packaging revision, for
-example `1.4.010-1`. The dashboard is pinned to a source commit by `DASHBOARD_REF` in the
-Dockerfile, so a new dashboard version requires reviewing and changing that value, updating
-the version label in the Dockerfile and committing. The workflow then publishes the new
-image.
+example `1.5.011-1`. `DASHBOARD_REF` in the Dockerfile selects the source commit.
+The old commit is retained until the main dashboard release is uploaded.
+
+1. Upload the final v1.5.011 files to the main dashboard repository.
+2. Set `DASHBOARD_REF` to that commit's full hash in your local Dockerfile.
+3. Build and test locally in Docker Desktop with `docker compose up -d --build`.
+4. Upload the tested Docker changes. GitHub Actions then builds, smoke-tests and
+   publishes the image.
+
+The build downloads every file in the dashboard release package, plus `LICENSE`
+and Chart.js with its license. The startup script copies all of them to the web
+directory; only the runtime HTML copy receives Docker configuration changes.
 
 
 ## Dashboard update check
 
 The startup script sets `DOCKER_INSTALLATION = true` only in the container's
 runtime copy of `index.html`. The original dashboard download remains unchanged.
-The browser checks once per tab session and again whenever Settings is opened.
-A newer dashboard version adds a red dot to Settings; that page shows the version
-and a link to releases. Reloading the page reuses the session result.
+The browser makes one update-check attempt per tab session, including failed attempts.
+Opening Settings again or reloading the page reuses that result. A newer dashboard
+version adds a red dot to Settings. That page shows the version, a link to releases
+and the following commands to run in the directory containing your `compose.yml`:
+
+```bash
+docker compose pull
+docker compose up -d
+```
+
+These commands apply to the prebuilt image. For a local build, update the repository
+and run `docker compose up -d --build` instead.
 
 nginx proxies `/versioncheck/` to the main project's `version.js` on GitHub over
 verified HTTPS. Browser credentials and incoming request headers are not forwarded.

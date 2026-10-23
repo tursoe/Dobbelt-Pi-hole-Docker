@@ -7,11 +7,21 @@ Dockerpakke til [Dobbelt Pi-hole](https://github.com/tursoe/Dobbelt-Pi-hole).
 APIkald til to, tre eller fire Pi-hole v6 installationer. Der er ingen
 applikationsbackend eller database.
 
-Denne pakke bruger kontrolpanelet **v1.4.010** fra den faste kildecommit
-`9e1404990df350cff461f00e10cfd4ef714d40ff` samt Chart.js **4.4.1**.
-Docker imagets version er **1.4.010-1**.
-Filerne hentes, når imaget bygges. De hentes ikke ved containerens opstart.
+Denne pakke er forberedt til kontrolpanelet **v1.5.011** og Chart.js **4.4.1**.
+`DASHBOARD_REF` i Dockerfile indeholder stadig den tidligere kildecommit.
+Udskift den med hashen for den endelige v1.5.011, når hovedprojektet er opdateret,
+før Docker-imaget bygges lokalt.
+Docker imagets version er **1.5.011-1**.
+Kontrolpanelet, sprogskabelonen, ikonerne og webmanifestet hentes, når imaget bygges. De hentes ikke ved containerens opstart.
 Kontrolpanelets kildekode bliver i det oprindelige repository.
+
+## Kontrolpanel v1.5.011
+
+Denne udgave tilføjer Overblik til sammenligning af instansernes opsætning,
+grupper og gruppetilknytninger, lokale CNAME-poster, Teleporter-backup,
+sekventiel Gravity-kø, oprydning i netværksenheder og valgfri startfane.
+Gruppefelter skjules automatisk, når kun standardgruppen bruges.
+Graferne for klientaktivitet viser alle klientserier fra Pi-hole APIet.
 
 ## Lokal bygning
 
@@ -103,7 +113,9 @@ Opstartsscriptet kopierer den monterede fil til den midlertidige webmappe.
 Når filen ændres, køres `docker compose restart dashboard`, og browserfanen
 genindlæses. Tilføjelse eller ændring af selve monteringen anvendes med
 `docker compose up -d`. Filen skal eksistere før opstart og kunne læses af
-containerens bruger 101. Se `language.template.js` i hovedprojektet for formatet.
+containerens bruger 101. Den komplette `language.template.js` er med i imaget
+og kan hentes under Indstillinger. Gyldige sprogpakker til v1.4.010 understøttes
+fortsat; manglende nye tekster vises på engelsk. Skabelonen til v1.5.011 har 368 nøgler.
 
 ## Drift
 
@@ -127,7 +139,7 @@ Node.js- eller PHPtjeneste.
 
 GitHub Actions bygger billedet til `linux/amd64` og `linux/arm64` og udgiver det i GitHub
 Container Registry som `ghcr.io/tursoe/dobbelt-pi-hole`, mærket `latest` og med versionen,
-fx `1.4.010-1`. Billedet bygges igen hver mandag, så opdateringer til nginx og Alpine følger
+fx `1.5.011-1`. Billedet bygges igen hver mandag, så opdateringer til nginx og Alpine følger
 med. Før hver udgivelse starter workflowen billedet med samme hærdning som i `compose.yml`
 ved siden af en falsk Pi-hole og kører `tests/smoke.sh`.
 
@@ -145,23 +157,42 @@ docker compose up -d
 ```
 
 Vil du bruge en fast version i stedet for `latest`, angives et versionstag, fx
-`ghcr.io/tursoe/dobbelt-pi-hole:1.4.010-1`.
+`ghcr.io/tursoe/dobbelt-pi-hole:1.5.011-1`.
 
 ## Versioner og opdatering
 
-Versionstagget er dashboardets version efterfulgt af Docker-pakkens revision, fx `1.4.010-1`.
-Dashboardet er fastlåst til en kildecommit med `DASHBOARD_REF` i Dockerfile, så en ny
-dashboardversion kræver, at værdien gennemses og ændres, at versionsmærket i Dockerfile
-rettes, og at ændringen committes. Workflowen udgiver derefter det nye billede.
+Versionstagget er dashboardets version efterfulgt af Docker-pakkens revision, fx `1.5.011-1`.
+`DASHBOARD_REF` i Dockerfile vælger kildecommitten. Den gamle hash bevares,
+indtil hovedprojektet er opdateret.
+
+1. Upload de endelige v1.5.011-filer til hovedprojektet.
+2. Sæt `DASHBOARD_REF` til den nye commits fulde hash i din lokale Dockerfile.
+3. Byg og test lokalt i Docker Desktop med `docker compose up -d --build`.
+4. Upload de testede Docker-ændringer. GitHub Actions bygger, tester og udgiver
+   derefter imaget.
+
+Bygningen henter alle filer fra kontrolpanelets udgivelsespakke samt `LICENSE`
+og Chart.js med tilhørende licens. Opstartsscriptet kopierer dem alle til
+webmappen. Kun den midlertidige HTML-kopi får Docker-opsætningen indsat.
 
 
 ## Kontrol af nye kontrolpanelversioner
 
 Opstartsscriptet sætter kun `DOCKER_INSTALLATION = true` i containerens
 midlertidige kopi af `index.html`. Hovedprojektets almindelige download ændres ikke.
-Browseren tjekker én gang pr. fanesession og igen, hver gang Indstillinger åbnes.
+Browseren foretager ét forsøg på versionstjek pr. fanesession, også ved fejl.
+Et nyt besøg i Indstillinger eller genindlæsning bruger det gemte resultat.
 En nyere kontrolpanelversion vises med en rød prik på Indstillinger. På siden
-vises versionen og et link til udgivelserne. Genindlæsning bruger sessionens resultat.
+vises versionen, et link til udgivelserne og disse kommandoer, der skal køres
+i mappen med din `compose.yml`:
+
+```bash
+docker compose pull
+docker compose up -d
+```
+
+Kommandoerne gælder det færdige image. Ved lokal bygning opdateres repositoryet,
+og derefter køres `docker compose up -d --build`.
 
 nginx videresender `/versioncheck/` til hovedprojektets `version.js` på GitHub via
 HTTPS med certifikatkontrol. Browserens legitimationsoplysninger og indgående

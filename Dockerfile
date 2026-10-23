@@ -3,10 +3,16 @@
 # Hent en fast udgave af hovedprojektet, mens imaget bygges.
 FROM alpine:3 AS assets
 RUN apk add --no-cache curl ca-certificates
-ARG DASHBOARD_REF=9e1404990df350cff461f00e10cfd4ef714d40ff
+# Udskift med den endelige v1.5.011-commit efter opdatering af hovedprojektet.
+# Den tidligere commit bevares indtil da; byg først efter at have rettet hashen.
+ARG DASHBOARD_REF=f192d6c1467b90482cd51b9f5c8c753a957a07cc
 WORKDIR /assets
 RUN set -eu; \
-    for file in index.html language.js LICENSE; do \
+    for file in index.html language.js language.template.js version.js \
+      README.md README.DA.md LICENSE \
+      favicon.ico icon.svg favicon-16x16.png favicon-32x32.png \
+      apple-touch-icon.png android-chrome-192x192.png android-chrome-512x512.png \
+      site.webmanifest; do \
         curl --fail --location --retry 3 \
           "https://raw.githubusercontent.com/tursoe/Dobbelt-Pi-hole/${DASHBOARD_REF}/${file}" \
           --output "${file}"; \
@@ -29,7 +35,7 @@ RUN chmod 0555 /opt/docker-entrypoint.sh
 LABEL org.opencontainers.image.title="Double Pi-hole Docker" \
       org.opencontainers.image.source="https://github.com/tursoe/Dobbelt-Pi-hole-Docker" \
       org.opencontainers.image.licenses="MIT" \
-      org.opencontainers.image.version="1.4.010-1"
+      org.opencontainers.image.version="1.5.011-1"
 
 # Alt genereret indhold er midlertidigt. Ingen adgangskoder gemmes her.
 USER 101:101
