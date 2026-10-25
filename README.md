@@ -14,6 +14,10 @@ The Docker image version is **1.5.011-1**.
 The dashboard, language template, icons and web manifest are downloaded when the image is built. No files are downloaded
 when the container starts. The dashboard source stays in the original repository.
 
+## Dashboard v1.5.012
+
+Updated to v1.5.012
+
 ## Dashboard v1.5.011
 
 This release adds Overview for comparing instance configuration, group management
