@@ -5,7 +5,7 @@ FROM alpine:3 AS assets
 RUN apk add --no-cache curl ca-certificates
 # Udskift med den endelige v1.5.011-commit efter opdatering af hovedprojektet.
 # Den tidligere commit bevares indtil da; byg først efter at have rettet hashen.
-ARG DASHBOARD_REF=f192d6c1467b90482cd51b9f5c8c753a957a07cc
+ARG DASHBOARD_REF=9437b6f1db6488baf6d4fad7c5241065960691f9
 WORKDIR /assets
 RUN set -eu; \
     for file in index.html language.js language.template.js version.js \
