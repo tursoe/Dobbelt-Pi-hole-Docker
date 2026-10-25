@@ -15,6 +15,9 @@ Docker imagets version er **1.5.011-1**.
 Kontrolpanelet, sprogskabelonen, ikonerne og webmanifestet hentes, når imaget bygges. De hentes ikke ved containerens opstart.
 Kontrolpanelets kildekode bliver i det oprindelige repository.
 
+## Kontrolpanel v1.5.012
+Opdateret med finsk
+
 ## Kontrolpanel v1.5.011
 
 Denne udgave tilføjer Overblik til sammenligning af instansernes opsætning,
