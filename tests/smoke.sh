@@ -49,7 +49,7 @@ check sh -c "curl -fsS '$base/healthz' | grep -qx ok"
 check sh -c "curl -fsS '$base/' > '$page'"
 check grep -q 'const DEFAULT_SERVER_COUNT = 3;' "$page"
 check grep -q 'const DOCKER_INSTALLATION = true;' "$page"
-check grep -q 'const APP_VERSION = "1.5.011";' "$page"
+check grep -q 'const APP_VERSION = "1.5.012";' "$page"
 # Test den faktiske nginx konfiguration uden at kræve internetadgang til GitHub.
 check sh -c "docker exec '$app' cat /tmp/dobbelt-pi-hole/nginx.conf | grep -q 'location = /versioncheck/'"
 check sh -c "docker exec '$app' cat /tmp/dobbelt-pi-hole/nginx.conf | grep -q 'refs/heads/main/version.js'"
