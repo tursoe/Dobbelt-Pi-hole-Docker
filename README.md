@@ -210,6 +210,9 @@ and it does not install updates. Use `docker compose pull` and
 
 ## License
 
+Copyright © 2023–2026 Christian Kragh Jessen  
+https://christiankragh.dk
+
 MIT; see [LICENSE](LICENSE). The original dashboard's MIT license and Chart.js's
 MIT license are included in the image under `/opt/dashboard/LICENSE` and
 `/opt/dashboard/Chart.js.LICENSE`.
