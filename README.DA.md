@@ -211,5 +211,8 @@ først dette repository, hvorefter `docker compose up -d --build` køres.
 
 ## Licens
 
+Copyright © 2023–2026 Christian Kragh Jessen  
+https://christiankragh.dk
+
 MIT. Se [LICENSE](LICENSE). Kontrolpanelets MIT-licens og Chart.js' MIT-licens
 ligger i imaget under `/opt/dashboard/LICENSE` og `/opt/dashboard/Chart.js.LICENSE`.
